@@ -57,7 +57,7 @@ Container test details: `tests/converge.yml` applies all five roles to the conta
 - `firewall` replaces `/etc/nftables.conf` completely. If you manage rules for Docker/Kubernetes with nftables, do not use this role as is.
 - Timezone is set through `/etc/localtime`, not `timedatectl`, so it also works in containers.
 
-## Structure
+## Repository layout
 
 ```
 site.yml                  playbook (roles in a sensible order, tags)
@@ -66,7 +66,3 @@ roles/<role>/             tasks, defaults, handlers, templates, vars
 tests/                    converge.yml, run-in-docker.sh
 .github/workflows/ci.yml  lint + container run
 ```
-
-## Кратко по-русски
-
-Роли Ansible для базовой настройки Linux-сервера (Ubuntu/Debian/Rocky): пользователи и ключи, пакеты/время/sysctl, усиление SSH, nftables, node_exporter. Роли применимы к чужому серверу: все параметры в `defaults/`, пример инвентаря в `inventories/example`. Проверено: yamllint, ansible-lint, syntax-check, двойной прогон в контейнерах Ubuntu 22.04 и Rocky 9 (второй прогон `changed=0`). Не проверено: запуск сервисов под systemd, `nft -c`, реальный скачиваемый node_exporter, Debian.

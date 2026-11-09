@@ -43,7 +43,7 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | `yamllint .` | no findings |
 | `ansible-lint` | passed, production profile, 0 failures |
 | `ansible-playbook --syntax-check site.yml` | OK |
-| `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
+| `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).

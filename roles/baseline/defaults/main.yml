@@ -1,5 +1,4 @@
 baseline_timezone: UTC
-baseline_packages: [curl, vim, chrony, ca-certificates, tzdata]
 baseline_extra_packages: []
 baseline_ntp_servers: []   # empty keeps the distribution's default pool
 baseline_sysctl:

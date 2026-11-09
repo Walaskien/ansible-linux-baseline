@@ -1,2 +1,3 @@
 baseline_chrony_service: chronyd
 baseline_chrony_conf: /etc/chrony.conf
+baseline_packages: [vim-enhanced, procps-ng, chrony, ca-certificates, tzdata]

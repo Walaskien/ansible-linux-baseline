@@ -10,6 +10,7 @@
     url: "{{ node_exporter_release_url }}/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}.tar.gz"
     dest: "/usr/local/src/node_exporter-{{ node_exporter_version }}.tar.gz"
     checksum: "sha256:{{ node_exporter_release_url }}/sha256sums.txt"
+    timeout: 60
     mode: "0644"
 
 - name: Unpack

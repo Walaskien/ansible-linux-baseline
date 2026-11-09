@@ -24,10 +24,13 @@
   tags: [time]
 
 - name: Configure NTP servers
-  ansible.builtin.template:
-    src: chrony-servers.conf.j2
-    dest: "{{ baseline_chrony_conf | dirname }}/conf.d/10-servers.conf"
-    mode: "0644"
+  ansible.builtin.blockinfile:
+    path: "{{ baseline_chrony_conf }}"
+    marker: "# {mark} ANSIBLE MANAGED NTP SERVERS"
+    block: |
+      {% for s in baseline_ntp_servers %}
+      server {{ s }} iburst
+      {% endfor %}
   when: baseline_ntp_servers | length > 0
   notify: Restart chrony
   tags: [time]
@@ -39,6 +42,13 @@
     enabled: true
   when: manage_services | default(true)
   tags: [time]
+
+- name: Ensure sysctl.d exists
+  ansible.builtin.file:
+    path: /etc/sysctl.d
+    state: directory
+    mode: "0755"
+  tags: [sysctl]
 
 - name: Write sysctl settings
   ansible.builtin.template:

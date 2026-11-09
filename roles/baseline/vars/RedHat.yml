@@ -1,0 +1,2 @@
+baseline_chrony_service: chronyd
+baseline_chrony_conf: /etc/chrony.conf

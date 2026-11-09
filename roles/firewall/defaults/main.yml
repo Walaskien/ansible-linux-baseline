@@ -1,0 +1,6 @@
+firewall_ssh_port: 22
+firewall_ssh_sources: []   # empty = SSH from anywhere; list CIDRs to restrict
+firewall_tcp_ports: []     # e.g. [{port: 443}, {port: 5432, sources: [10.0.0.0/24]}]
+firewall_icmp_allowed: true
+# nft -c needs CAP_NET_ADMIN; set to false when running inside an unprivileged container.
+firewall_validate: true

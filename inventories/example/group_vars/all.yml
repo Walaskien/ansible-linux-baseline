@@ -1,0 +1,20 @@
+ansible_user: deploy
+
+baseline_timezone: Europe/Moscow
+baseline_extra_packages: [htop, tcpdump]
+
+users_list:
+  - name: alice
+    groups: []
+    sudo: true
+    ssh_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPLACEHOLDERPLACEHOLDERPLACEHOLDER alice@example.com"
+
+ssh_hardening_password_auth: false
+ssh_hardening_allow_groups: []
+
+firewall_tcp_ports:
+  - {port: 80}
+  - {port: 443}
+firewall_ssh_sources: [203.0.113.0/24]
+node_exporter_allowed_sources: [198.51.100.10/32]

@@ -1,0 +1,7 @@
+node_exporter_version: "1.8.2"
+node_exporter_arch: "{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64' }}"
+node_exporter_listen: ":9100"
+node_exporter_user: node_exporter
+node_exporter_allowed_sources: []   # CIDRs allowed to scrape port 9100 (used by the firewall role)
+node_exporter_download_base: https://github.com/prometheus/node_exporter/releases/download
+node_exporter_release_url: "{{ node_exporter_download_base }}/v{{ node_exporter_version }}"

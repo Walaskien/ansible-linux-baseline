@@ -1,0 +1,9 @@
+ssh_hardening_port: 22
+ssh_hardening_permit_root_login: "no"
+# Set to true only after your key login works, otherwise you lock yourself out.
+ssh_hardening_password_auth: false
+ssh_hardening_max_auth_tries: 4
+ssh_hardening_login_grace_time: 30
+ssh_hardening_client_alive_interval: 300
+ssh_hardening_client_alive_count_max: 2
+ssh_hardening_allow_groups: []   # empty = no AllowGroups restriction

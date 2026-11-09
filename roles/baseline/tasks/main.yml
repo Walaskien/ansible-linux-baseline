@@ -1,0 +1,49 @@
+- name: Load OS-family variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install baseline packages
+  ansible.builtin.package:
+    name: "{{ baseline_packages + baseline_extra_packages }}"
+    state: present
+  tags: [packages]
+
+- name: Set timezone link
+  ansible.builtin.file:
+    src: "/usr/share/zoneinfo/{{ baseline_timezone }}"
+    dest: /etc/localtime
+    state: link
+    force: true
+  tags: [time]
+
+- name: Set /etc/timezone (Debian family)
+  ansible.builtin.copy:
+    content: "{{ baseline_timezone }}\n"
+    dest: /etc/timezone
+    mode: "0644"
+  when: ansible_os_family == "Debian"
+  tags: [time]
+
+- name: Configure NTP servers
+  ansible.builtin.template:
+    src: chrony-servers.conf.j2
+    dest: "{{ baseline_chrony_conf | dirname }}/conf.d/10-servers.conf"
+    mode: "0644"
+  when: baseline_ntp_servers | length > 0
+  notify: Restart chrony
+  tags: [time]
+
+- name: Enable chrony
+  ansible.builtin.service:
+    name: "{{ baseline_chrony_service }}"
+    state: started
+    enabled: true
+  when: manage_services | default(true)
+  tags: [time]
+
+- name: Write sysctl settings
+  ansible.builtin.template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.d/90-baseline.conf
+    mode: "0644"
+  notify: Reload sysctl
+  tags: [sysctl]

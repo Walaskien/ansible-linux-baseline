@@ -1,0 +1,5 @@
+- name: Reload nftables
+  ansible.builtin.service:
+    name: nftables
+    state: restarted
+  when: manage_services | default(true)

@@ -1,0 +1,22 @@
+- name: Load OS-family variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install OpenSSH server
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
+
+# The drop-in is read before the rest of sshd_config on current Ubuntu/Debian/Rocky (Include at the top).
+- name: Create sshd drop-in directory
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    mode: "0755"
+
+- name: Write hardening drop-in (validated with sshd -t)
+  ansible.builtin.template:
+    src: hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    mode: "0600"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Reload sshd

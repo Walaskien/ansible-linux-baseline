@@ -1,0 +1,4 @@
+# Managed by Ansible (role baseline)
+{% for key, value in baseline_sysctl | dictsort %}
+{{ key }} = {{ value }}
+{% endfor %}

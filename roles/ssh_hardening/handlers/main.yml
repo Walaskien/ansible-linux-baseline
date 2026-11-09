@@ -1,0 +1,5 @@
+- name: Reload sshd
+  ansible.builtin.service:
+    name: "{{ ssh_hardening_service }}"
+    state: reloaded
+  when: manage_services | default(true)

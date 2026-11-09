@@ -1,0 +1,36 @@
+#!/usr/sbin/nft -f
+# Managed by Ansible (role firewall). Default policy: drop inbound.
+flush ruleset
+
+table inet filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+    ct state established,related accept
+    ct state invalid drop
+    iif "lo" accept
+{% if firewall_icmp_allowed %}
+    meta l4proto { icmp, ipv6-icmp } accept
+{% endif %}
+{% if firewall_ssh_sources | length > 0 %}
+    ip saddr { {{ firewall_ssh_sources | join(', ') }} } tcp dport {{ firewall_ssh_port }} accept
+{% else %}
+    tcp dport {{ firewall_ssh_port }} accept
+{% endif %}
+{% for rule in firewall_tcp_ports %}
+{% if rule.sources | default([]) | length > 0 %}
+    ip saddr { {{ rule.sources | join(', ') }} } tcp dport {{ rule.port }} accept
+{% else %}
+    tcp dport {{ rule.port }} accept
+{% endif %}
+{% endfor %}
+{% if node_exporter_allowed_sources | default([]) | length > 0 %}
+    ip saddr { {{ node_exporter_allowed_sources | join(', ') }} } tcp dport 9100 accept
+{% endif %}
+  }
+  chain forward {
+    type filter hook forward priority 0; policy drop;
+  }
+  chain output {
+    type filter hook output priority 0; policy accept;
+  }
+}

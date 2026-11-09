@@ -1,0 +1,11 @@
+baseline_timezone: UTC
+baseline_packages: [curl, vim, chrony, ca-certificates, tzdata]
+baseline_extra_packages: []
+baseline_ntp_servers: []   # empty keeps the distribution's default pool
+baseline_sysctl:
+  net.ipv4.tcp_syncookies: 1
+  net.ipv4.conf.all.rp_filter: 1
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv4.icmp_echo_ignore_broadcasts: 1
+  vm.swappiness: 10

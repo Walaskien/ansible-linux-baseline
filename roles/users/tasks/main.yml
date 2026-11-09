@@ -1,0 +1,51 @@
+- name: Load OS-family variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install sudo
+  ansible.builtin.package:
+    name: sudo
+    state: present
+  when: users_list | selectattr('sudo', 'defined') | selectattr('sudo') | list | length > 0
+
+- name: Create users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    groups: "{{ item.groups | default([]) + ([users_admin_group] if item.sudo | default(false) else []) }}"
+    append: true
+    state: present
+  loop: "{{ users_list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create .ssh directories
+  ansible.builtin.file:
+    path: "/home/{{ item.name }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0700"
+  loop: "{{ users_list | selectattr('ssh_keys', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Adds keys; it does not remove keys that are already in the file.
+- name: Add authorized keys
+  ansible.builtin.lineinfile:
+    path: "/home/{{ item.0.name }}/.ssh/authorized_keys"
+    line: "{{ item.1 }}"
+    create: true
+    owner: "{{ item.0.name }}"
+    group: "{{ item.0.name }}"
+    mode: "0600"
+  loop: "{{ users_list | selectattr('ssh_keys', 'defined') | subelements('ssh_keys') }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+
+- name: Sudo without password for admin group
+  ansible.builtin.copy:
+    content: "%{{ users_admin_group }} ALL=(ALL) NOPASSWD:ALL\n"
+    dest: /etc/sudoers.d/90-admin-group
+    mode: "0440"
+    validate: visudo -cf %s
+  when: users_sudo_nopasswd and (users_list | selectattr('sudo', 'defined') | selectattr('sudo') | list | length > 0)

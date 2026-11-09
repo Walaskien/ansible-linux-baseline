@@ -1,0 +1,7 @@
+# - name: alice
+#   groups: [docker]
+#   shell: /bin/bash
+#   sudo: true            # passwordless sudo through the OS admin group
+#   ssh_keys: ["ssh-ed25519 AAAA... alice@example.com"]
+users_list: []
+users_sudo_nopasswd: true

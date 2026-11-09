@@ -7,12 +7,14 @@ repo="$(cd "$(dirname "$0")/.." && pwd)"
 name="baseline-test-$$"
 trap 'docker rm -f "$name" >/dev/null 2>&1 || true' EXIT
 
+retry() { for _ in 1 2 3; do "$@" && return 0; sleep 5; done; return 1; }
+
 docker run -d --name "$name" -v "$repo:/repo:ro" "$image" sleep 3600 >/dev/null
 case "$image" in
   ubuntu*|debian*)
-    docker exec "$name" bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-pip tar ca-certificates openssh-server >/dev/null' ;;
+    retry docker exec "$name" bash -c 'apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-pip tar ca-certificates openssh-server >/dev/null' ;;
   *)
-    docker exec "$name" bash -c 'dnf install -y -q python3-pip tar openssh-server >/dev/null' ;;
+    retry docker exec "$name" bash -c 'dnf clean all >/dev/null; dnf install -y -q python3-pip tar openssh-server >/dev/null' ;;
 esac
 docker exec "$name" pip3 install -q --retries 8 --timeout 60 'ansible-core>=2.15,<2.16' 2>&1 | grep -v WARNING || true
 

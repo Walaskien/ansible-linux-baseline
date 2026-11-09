@@ -47,7 +47,7 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | `ansible-playbook --syntax-check site.yml` | OK |
 | `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
-| GitHub Actions (`ci`, run 42587328944, commit "yamllint: allow 'on' key in workflows") | success: `lint` job, and `converge` for `ubuntu:22.04` and `rockylinux:9` (second run `changed=0` is asserted by the script) |
+| GitHub Actions (`ci`, run 42588198350, commit "Retry package setup in the container test") | success: `lint` job, and `converge` for `ubuntu:22.04` and `rockylinux:9` (second run `changed=0` is asserted by the script). One earlier run failed on a Rocky mirror download, not on the roles; the script now retries the package setup |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).
 

@@ -1,0 +1,20 @@
+- name: Converge in a container
+  hosts: localhost
+  connection: local
+  vars:
+    manage_services: false    # no systemd in the container
+    firewall_validate: false  # no CAP_NET_ADMIN in the container
+    baseline_timezone: Europe/Berlin
+    baseline_ntp_servers: [0.pool.ntp.org]
+    users_list:
+      - {name: alice, sudo: true, ssh_keys: ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPLACEHOLDER alice@example.com"]}
+      - {name: bob, groups: [], ssh_keys: []}
+    firewall_ssh_sources: [203.0.113.0/24]
+    firewall_tcp_ports: [{port: 443}, {port: 5432, sources: [10.0.0.0/24]}]
+    node_exporter_allowed_sources: [198.51.100.10/32]
+  roles:
+    - users
+    - baseline
+    - ssh_hardening
+    - firewall
+    - node_exporter

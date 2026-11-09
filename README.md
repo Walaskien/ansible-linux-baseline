@@ -1,5 +1,7 @@
 # ansible-linux-baseline
 
+[![ci](https://github.com/Walaskien/ansible-linux-baseline/actions/workflows/ci.yml/badge.svg)](https://github.com/Walaskien/ansible-linux-baseline/actions/workflows/ci.yml)
+
 Ansible roles for the basic setup of a Linux server: users, time and packages, SSH hardening, firewall, Prometheus node_exporter. Works on Ubuntu, Debian and Rocky Linux (RHEL family).
 
 Use it when you have a few servers that were set up by hand, each a little different, and you want one repeatable baseline that you can read, review and run again without changing anything that is already correct.
@@ -45,10 +47,11 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | `ansible-playbook --syntax-check site.yml` | OK |
 | `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
+| GitHub Actions (`ci`, run 42587328944, commit "yamllint: allow 'on' key in workflows") | success: `lint` job, and `converge` for `ubuntu:22.04` and `rockylinux:9` (second run `changed=0` is asserted by the script) |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).
 
-**Not verified:** starting and reloading services (systemd), `nft -c` validation of the generated ruleset, a real node_exporter binary, Debian (only Ubuntu and Rocky tested), Rocky/Ubuntu on real hosts or VMs. Molecule is not used. GitHub Actions workflow (lint + the same container test for both images) has not run yet.
+**Not verified:** starting and reloading services (systemd), `nft -c` validation of the generated ruleset, a real node_exporter binary, Debian (only Ubuntu and Rocky tested), Rocky/Ubuntu on real hosts or VMs. Molecule is not used.
 
 ## Limits
 
@@ -66,3 +69,8 @@ roles/<role>/             tasks, defaults, handlers, templates, vars
 tests/                    converge.yml, run-in-docker.sh
 .github/workflows/ci.yml  lint + container run
 ```
+
+## Related
+
+- [queue-saturation-observability](https://github.com/Walaskien/queue-saturation-observability): Prometheus rules and dashboards that use the node_exporter metrics this role installs.
+- [mikrotik-site-to-site](https://github.com/Walaskien/mikrotik-site-to-site): config generator for the network side of the same kind of small estate.

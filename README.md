@@ -46,12 +46,13 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | `ansible-lint` | passed, production profile, 0 failures |
 | `ansible-playbook --syntax-check site.yml` | OK |
 | `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
+| `tests/run-in-docker.sh debian:12` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
-| GitHub Actions (`ci`, run 42588198350, commit "Retry package setup in the container test") | success: `lint` job, and `converge` for `ubuntu:22.04` and `rockylinux:9` (second run `changed=0` is asserted by the script). One earlier run failed on a Rocky mirror download, not on the roles; the script now retries the package setup |
+| GitHub Actions (`ci`, run 42588198350, commit "Retry package setup in the container test") | success: `lint` job, and `converge` for `ubuntu:22.04`, `debian:12` and `rockylinux:9` (second run `changed=0` is asserted by the script). One earlier run failed on a Rocky mirror download, not on the roles; the script now retries the package setup |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).
 
-**Not verified:** starting and reloading services (systemd), `nft -c` validation of the generated ruleset, a real node_exporter binary, Debian (only Ubuntu and Rocky tested), Rocky/Ubuntu on real hosts or VMs. Molecule is not used.
+**Not verified:** starting and reloading services (systemd), `nft -c` validation of the generated ruleset, a real node_exporter binary, Rocky/Ubuntu on real hosts or VMs. Molecule is not used.
 
 ## Limits
 
@@ -69,6 +70,13 @@ roles/<role>/             tasks, defaults, handlers, templates, vars
 tests/                    converge.yml, run-in-docker.sh
 .github/workflows/ci.yml  lint + container run
 ```
+
+## What I would improve next
+
+- Run the roles against a real VM (systemd, `nft -c`, real node_exporter download) instead of only containers.
+- Add Molecule scenarios so each role can be tested on its own.
+- Remove stale keys in `users` (today it only adds keys).
+- Support a non-nftables firewall (ufw/firewalld) for hosts that already use one.
 
 ## Related
 

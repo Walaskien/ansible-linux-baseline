@@ -16,7 +16,8 @@ case "$image" in
   *)
     retry docker exec "$name" bash -c 'dnf clean all >/dev/null; dnf install -y -q python3-pip tar openssh-server >/dev/null' ;;
 esac
-docker exec "$name" pip3 install -q --retries 8 --timeout 60 'ansible-core>=2.15,<2.16' 2>&1 | grep -v WARNING || true
+# PEP 668: Debian 12 refuses system-wide pip installs; this is a throwaway container.
+docker exec -e PIP_BREAK_SYSTEM_PACKAGES=1 "$name" pip3 install -q --retries 8 --timeout 60 'ansible-core>=2.15,<2.16' 2>&1 | grep -v WARNING || true
 
 # Offline mirror with a dummy node_exporter, so the download/checksum/unpack logic is tested
 # without depending on GitHub. The real release URL is not exercised here.

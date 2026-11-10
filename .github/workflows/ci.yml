@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        image: ["ubuntu:22.04", "rockylinux:9"]
+        image: ["ubuntu:22.04", "debian:12", "rockylinux:9"]
     steps:
       - uses: actions/checkout@v4
       - run: tests/run-in-docker.sh ${{ matrix.image }}

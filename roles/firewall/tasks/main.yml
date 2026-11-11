@@ -9,7 +9,7 @@
     dest: /etc/nftables.conf
     mode: "0644"
     validate: "{{ 'nft -c -f %s' if firewall_validate else omit }}"
-  notify: Reload nftables
+  notify: Restart nftables
 
 - name: Enable nftables
   ansible.builtin.service:

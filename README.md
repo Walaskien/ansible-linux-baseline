@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/Walaskien/ansible-linux-baseline/actions/workflows/ci.yml/badge.svg)](https://github.com/Walaskien/ansible-linux-baseline/actions/workflows/ci.yml)
 
-Ansible roles for the basic setup of a Linux server: users, time and packages, SSH hardening, firewall, Prometheus node_exporter. Works on Ubuntu, Debian and Rocky Linux (RHEL family).
+Ansible roles for the basic setup of a Linux server: users, time and packages, SSH hardening, firewall, Prometheus node_exporter. Written for Ubuntu, Debian and Rocky Linux; tested in containers of those three (see Verified).
 
 Use it when you have a few servers that were set up by hand, each a little different, and you want one repeatable baseline that you can read, review and run again without changing anything that is already correct.
 
@@ -43,12 +43,12 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | Check | Result |
 |---|---|
 | `yamllint .` | no findings |
-| `ansible-lint` | passed, production profile, 0 failures |
+| `ansible-lint` | passed, 0 failures |
 | `ansible-playbook --syntax-check site.yml` | OK |
 | `tests/run-in-docker.sh ubuntu:22.04` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh debian:12` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
-| GitHub Actions (`ci`, run 42588198350, commit "Retry package setup in the container test") | success: `lint` job, and `converge` for `ubuntu:22.04`, `debian:12` and `rockylinux:9` (second run `changed=0` is asserted by the script). One earlier run failed on a Rocky mirror download, not on the roles; the script now retries the package setup |
+| GitHub Actions | `lint` job, and `converge` for `ubuntu:22.04`, `debian:12` and `rockylinux:9`; the script fails unless the second run reports `changed=0`. The package setup in the script is retried because a mirror download once failed a Rocky run |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).
 
@@ -57,9 +57,10 @@ Container test details: `tests/converge.yml` applies all five roles to the conta
 ## Limits
 
 - Level: practical baseline, not a compliance profile (no CIS/STIG claim). SSH ciphers are left at the distribution defaults.
-- IPv4 rules only for specific ports and sources; IPv6 follows the same default-drop policy with ICMP allowed.
+- `sources` lists take IPv4 CIDRs. Ports without `sources` are open for IPv4 and IPv6, and the default-drop policy covers both.
 - `firewall` replaces `/etc/nftables.conf` completely. If you manage rules for Docker/Kubernetes with nftables, do not use this role as is.
 - Timezone is set through `/etc/localtime`, not `timedatectl`, so it also works in containers.
+- Pinned to ansible-core 2.15 (see `requirements-dev.txt`), which is older than the releases that get fixes now. Not tried on newer ones.
 
 ## Repository layout
 

@@ -10,6 +10,10 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
       - run: yamllint .
+      - name: shellcheck
+        run: shellcheck -x tests/run-in-docker.sh
+      - name: actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
       - run: ansible-lint
       - run: ansible-playbook --syntax-check site.yml
   converge:

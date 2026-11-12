@@ -65,6 +65,7 @@ Container test details: `tests/converge.yml` applies all five roles to the conta
 ## Repository layout
 
 ```
+Makefile                  help, lint, syntax, test (IMAGE=debian:12)
 site.yml                  playbook (roles in a sensible order, tags)
 inventories/example/      hosts.yml, group_vars/all.yml
 roles/<role>/             tasks, defaults, handlers, templates, vars

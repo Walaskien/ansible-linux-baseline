@@ -37,6 +37,8 @@ run() {
 }
 echo "== first run"; run | grep -E "fatal|PLAY RECAP|^localhost" | cut -c1-400
 echo "== second run (must be changed=0)"
-out="$(run)"; echo "$out" | grep -E "fatal|FAILED|PLAY RECAP|^localhost" | cut -c1-400
+# with set -e a failed run would exit here before anything is printed, so show the tail first
+out="$(run)" || { echo "$out" | tail -n 20; echo "SECOND RUN FAILED"; exit 1; }
+echo "$out" | grep -E "fatal|FAILED|PLAY RECAP|^localhost" | cut -c1-400
 echo "$out" | grep -Eq 'changed=0 .*failed=0' || { echo "NOT IDEMPOTENT"; exit 1; }
 echo "OK: $image idempotent"

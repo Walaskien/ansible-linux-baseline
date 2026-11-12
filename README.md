@@ -49,7 +49,8 @@ Ansible-core 2.15.13, ansible-lint 6.22.2, yamllint, Python 3.9 on macOS; contai
 | `tests/run-in-docker.sh debian:12` | first run `changed=18, failed=0`; **second run `changed=0, failed=0`** |
 | `tests/run-in-docker.sh rockylinux:9` | first run `changed=19, failed=0`; **second run `changed=0, failed=0`** |
 | `make test IMAGE=debian:12` (after the script change on 2026-11-12) | second run `changed=0, failed=0`; shellcheck and actionlint on the script and workflow pass |
-| GitHub Actions | `lint` job, and `converge` for `ubuntu:22.04`, `debian:12` and `rockylinux:9`; the script fails unless the second run reports `changed=0`. The package setup in the script is retried because a mirror download once failed a Rocky run |
+| `make test` on `debian:12`, `ubuntu:22.04`, `rockylinux:9` (after adding a third run, 2026-11-12) | third run with `--check` also `changed=0, failed=0` on all three |
+| GitHub Actions | `lint` job, and `converge` for `ubuntu:22.04`, `debian:12` and `rockylinux:9`; the script fails unless the second run and a third `--check` run report `changed=0`. The package setup in the script is retried because a mirror download once failed a Rocky run |
 
 Container test details: `tests/converge.yml` applies all five roles to the container itself (local connection), then again. It runs with `manage_services=false` (no systemd in the container) and `firewall_validate=false` (no `CAP_NET_ADMIN`). The node_exporter download is served from a small local HTTP mirror inside the container with a dummy binary, so the download, checksum, unpack and install steps and their idempotence are tested, but not the real GitHub URL (it was not reachable from the test machine).
 

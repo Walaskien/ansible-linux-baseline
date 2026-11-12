@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Usage: tests/run-in-docker.sh ubuntu:22.04|rockylinux:9
 # Applies all roles twice inside a container and fails unless the second run reports changed=0.
+# A third run in --check mode must report changed=0 as well.
 set -euo pipefail
 image="${1:?image}"
 repo="$(cd "$(dirname "$0")/.." && pwd)"
@@ -33,7 +34,7 @@ docker exec "$name" bash -c '
 
 run() {
   docker exec -e ANSIBLE_ROLES_PATH=/repo/roles -e ANSIBLE_LOCALHOST_WARNING=false "$name" \
-    sh -c 'mkdir -p /run/sshd && ssh-keygen -A >/dev/null 2>&1 || true; ansible-playbook /repo/tests/converge.yml -e node_exporter_download_base=http://127.0.0.1:8000'
+    sh -c 'mkdir -p /run/sshd && ssh-keygen -A >/dev/null 2>&1 || true; ansible-playbook /repo/tests/converge.yml -e node_exporter_download_base=http://127.0.0.1:8000 "$@"' sh "$@"
 }
 echo "== first run"; run | grep -E "fatal|PLAY RECAP|^localhost" | cut -c1-400
 echo "== second run (must be changed=0)"
@@ -41,4 +42,8 @@ echo "== second run (must be changed=0)"
 out="$(run)" || { echo "$out" | tail -n 20; echo "SECOND RUN FAILED"; exit 1; }
 echo "$out" | grep -E "fatal|FAILED|PLAY RECAP|^localhost" | cut -c1-400
 echo "$out" | grep -Eq 'changed=0 .*failed=0' || { echo "NOT IDEMPOTENT"; exit 1; }
+echo "== third run, --check (must be changed=0)"
+out="$(run --check)" || { echo "$out" | tail -n 20; echo "CHECK RUN FAILED"; exit 1; }
+echo "$out" | grep -E "fatal|FAILED|PLAY RECAP|^localhost" | cut -c1-400
+echo "$out" | grep -Eq 'changed=0 .*failed=0' || { echo "CHECK MODE REPORTS CHANGES"; exit 1; }
 echo "OK: $image idempotent"
